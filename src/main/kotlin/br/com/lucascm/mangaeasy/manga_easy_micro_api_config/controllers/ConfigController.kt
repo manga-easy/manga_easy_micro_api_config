@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/v1/config")
 class ConfigController(@Autowired val repo: ConfigRepository) {
 
-
     @GetMapping()
     fun list(): Config {
         return repo.findAll().last()
