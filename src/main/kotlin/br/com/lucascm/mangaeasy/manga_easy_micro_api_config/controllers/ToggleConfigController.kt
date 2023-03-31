@@ -89,7 +89,6 @@ class ToggleConfigController(@Autowired val repo: ToggleConfigRepository) {
     @ResponseBody
     fun delete( @PathVariable id: String, authentication: Authentication): Any {
         try {
-            //if (tokenService.parseToken(jwt) != null) throw Exception("User não  autenticado")
             val verify = repo.findById(id)
             if (verify.isEmpty) throw Exception("Toggle não existe")
             val result = repo.deleteById(id)
