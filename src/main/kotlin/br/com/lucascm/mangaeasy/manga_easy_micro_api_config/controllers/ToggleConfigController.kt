@@ -3,23 +3,25 @@ package br.com.lucascm.mangaeasy.manga_easy_micro_api_config.controllers
 import br.com.lucascm.mangaeasy.manga_easy_micro_api_config.dtos.ToggleDto
 import br.com.lucascm.mangaeasy.manga_easy_micro_api_config.entities.ResultEntity
 import br.com.lucascm.mangaeasy.manga_easy_micro_api_config.entities.StatusResultEnum
-import br.com.lucascm.mangaeasy.manga_easy_micro_api_config.entities.ToggleConfigEntity
 import br.com.lucascm.mangaeasy.manga_easy_micro_api_config.mappers.ToggleEntityMapper
 import br.com.lucascm.mangaeasy.manga_easy_micro_api_config.repositories.ToggleConfigRepository
+import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/v1/toggle")
 class ToggleConfigController(@Autowired val repo: ToggleConfigRepository) {
+    private val logger: KotlinLogging = KotlinLogging
     @GetMapping("/search")
-    fun list(@RequestParam("name") name: String?): ResultEntity<Any> {
+    @ResponseBody
+    fun list(@RequestParam("name") name: String?): ResultEntity {
         try {
-            var values = listOf<ToggleConfigEntity>()
-            if (name == null){
-                values =  repo.findAll()
+            val values = if (name == null){
+                repo.findAll()
             }else{
-                values = repo.findByName(name)
+                repo.findByName(name)
             }
             return ResultEntity(
                 total = values.size,
@@ -28,77 +30,83 @@ class ToggleConfigController(@Autowired val repo: ToggleConfigRepository) {
                 message = "Listado com sucesso"
             )
         } catch (e: Exception) {
-            return ResultEntity<Any>(
+            logger.logger("/v1/toggle/search").error(e.message, e.stackTrace)
+            return ResultEntity(
                 total = 0,
                 status = StatusResultEnum.ERROR,
                 data = listOf(),
                 message = e.message
-            );
+            )
         }
     }
 
-    @PutMapping()
-    @ResponseBody()
-    fun update( @RequestBody() body: ToggleDto): ResultEntity<Any> {
+    @PutMapping
+    @ResponseBody
+    fun update( @RequestBody body: ToggleDto, authentication: Authentication): ResultEntity {
         try {
             val entity = ToggleEntityMapper().toDto(body)
             val result = repo.save(entity)
-            return ResultEntity<Any>(
+            return ResultEntity(
                 total = 1,
                 status = StatusResultEnum.SUCCESS,
                 data = listOf(result),
                 message = "Toggle salvo com sucesso Id ${result.id}"
-            );
+            )
         } catch (e: Exception) {
-            return ResultEntity<Any>(
+            logger.logger("/v1/toggle/put").error(e.message, e.stackTrace)
+
+            return ResultEntity(
                 total = 0,
                 status = StatusResultEnum.ERROR,
                 data = listOf(),
                 message = e.message
-            );
+            )
         }
     }
     @GetMapping("/{id}")
-    @ResponseBody()
+    @ResponseBody
     fun getId( @PathVariable id: String): Any {
         try {
             val result = repo.findById(id)
             if (result.isEmpty) throw Exception("Toggle não existe")
-            return ResultEntity<Any>(
+            return ResultEntity(
                 total = 1,
                 status = StatusResultEnum.SUCCESS,
                 data = listOf(result),
                 message = "Toggle retornado com sucesso Id ${result.get().id}"
-            );
+            )
         } catch (e: Exception) {
-            return ResultEntity<Any>(
+            logger.logger("/v1/toggle/get/$id").error(e.message, e.stackTrace)
+            return ResultEntity(
                 total = 0,
                 status = StatusResultEnum.ERROR,
                 data = listOf(),
                 message = e.message
-            );
+            )
         }
     }
     @DeleteMapping("/{id}")
-    @ResponseBody()
-    fun delete( @PathVariable id: String): Any {
+    @ResponseBody
+    fun delete( @PathVariable id: String, authentication: Authentication): Any {
         try {
+            //if (tokenService.parseToken(jwt) != null) throw Exception("User não  autenticado")
             val verify = repo.findById(id)
             if (verify.isEmpty) throw Exception("Toggle não existe")
             val result = repo.deleteById(id)
-            return ResultEntity<Any>(
+            return ResultEntity(
                 total = 1,
                 status = StatusResultEnum.SUCCESS,
                 data = listOf(result),
                 message = "Toggle deletado com sucesso Id $id"
-            );
+            )
         } catch (e: Exception) {
-            return ResultEntity<Any>(
+            logger.logger("/v1/toggle/delete/$id").error(e.message, e.stackTrace)
+            return ResultEntity(
                 total = 0,
                 status = StatusResultEnum.ERROR,
                 data = listOf(),
                 message = e.message
-            );
+            )
         }
     }
 }
