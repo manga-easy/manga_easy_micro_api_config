@@ -9,7 +9,6 @@ Before setting up the Manga Easy Micro API, ensure that you have the following p
 - [Java Development Kit (JDK)](https://adoptopenjdk.net) installed
 - [Kotlin](https://kotlinlang.org) installed
 - [MongoDB](https://www.mongodb.com) installed and running
-- [API keys](https://example.com) for any external services required (e.g., authentication, image hosting)
 
 ## Installation
 
